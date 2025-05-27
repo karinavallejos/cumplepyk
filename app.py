@@ -5,9 +5,9 @@ app = Flask(__name__)
 
 clicks = []
 usuarios = {}  # jugador → mesa
-puntos = {}    # mesa → puntos
+puntos = {}     # mesa → puntos
 buzzer_activo = True
-CLAVE_HOST = "123"
+CLAVE_HOST = "Karina123"
 
 @app.route("/")
 def index():
@@ -28,7 +28,6 @@ def buzz():
             "nombre": nombre,
             "hora": datetime.now().strftime("%H:%M:%S")
         })
-
         if nombre not in usuarios:
             if "(" in nombre and ")" in nombre:
                 mesa = nombre.split("(")[-1].replace(")", "").strip()
