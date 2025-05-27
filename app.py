@@ -2,11 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify
 from datetime import datetime
 
 app = Flask(__name__)
-clicks = []
-puntos = {}  # puntos por mesa
-usuarios = {}  # usuario: mesa asociada
 
-CLAVE_HOST = "miclave123"  # CAMBIA esta clave
+clicks = []
+usuarios = {}  # jugador → mesa
+puntos = {}    # mesa → puntos
+buzzer_activo = True
+CLAVE_HOST = "123"
 
 @app.route("/")
 def index():
@@ -14,25 +15,27 @@ def index():
 
 @app.route("/buzz", methods=["POST"])
 def buzz():
-    nombre = request.form.get("nombre")
-    if nombre and nombre not in [c['nombre'] for c in clicks]:
-        clicks.append({"nombre": nombre, "hora": datetime.now().strftime("%H:%M:%S")})
+    global clicks
+    if not buzzer_activo:
+        return redirect(url_for("index"))
 
-        # registrar mesa si es nueva
+    nombre = request.form.get("nombre")
+    if not nombre:
+        return redirect(url_for("index"))
+
+    if nombre not in [c['nombre'] for c in clicks]:
+        clicks.append({
+            "nombre": nombre,
+            "hora": datetime.now().strftime("%H:%M:%S")
+        })
+
         if nombre not in usuarios:
             if "(" in nombre and ")" in nombre:
                 mesa = nombre.split("(")[-1].replace(")", "").strip()
                 usuarios[nombre] = mesa
-                if mesa not in puntos:
-                    puntos[mesa] = 0
-    return redirect(url_for('index'))
+                puntos.setdefault(mesa, 0)
 
-@app.route("/reset", methods=["POST"])
-def reset():
-    clave = request.form.get("clave")
-    if clave == CLAVE_HOST:
-        clicks.clear()
-    return redirect(url_for('index'))
+    return redirect(url_for("index"))
 
 @app.route("/estado")
 def estado():
@@ -42,18 +45,40 @@ def estado():
 def ver_puntos():
     return jsonify(puntos)
 
+@app.route("/jugadores")
+def jugadores():
+    return jsonify(usuarios)
+
 @app.route("/sumar", methods=["POST"])
-def sumar_punto():
+def sumar():
     clave = request.form.get("clave")
     jugador = request.form.get("jugador")
+
     if clave == CLAVE_HOST and jugador in usuarios:
         mesa = usuarios[jugador]
         puntos[mesa] = puntos.get(mesa, 0) + 1
-    return redirect(url_for('index'))
 
-@app.route("/jugadores")
-def lista_jugadores():
-    return jsonify(usuarios)
+    return redirect(url_for("index"))
+
+@app.route("/reset", methods=["POST"])
+def reset():
+    global clicks
+    clave = request.form.get("clave")
+    if clave == CLAVE_HOST:
+        clicks = []
+    return redirect(url_for("index"))
+
+@app.route("/toggle", methods=["POST"])
+def toggle():
+    global buzzer_activo
+    clave = request.form.get("clave")
+    if clave == CLAVE_HOST:
+        buzzer_activo = not buzzer_activo
+    return redirect(url_for("index"))
+
+@app.route("/buzzer_estado")
+def buzzer_estado():
+    return jsonify({"activo": buzzer_activo})
 
 if __name__ == "__main__":
     app.run(debug=True)
