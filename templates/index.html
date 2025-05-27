@@ -77,6 +77,7 @@
       <option>Mesa Jocelyn Bell Burnell</option>
       <option>Mesa Cecilia Payne-Gaposchkin</option>
       <option>Mesa Henrietta Swan Leavitt</option>
+      <option>HOST</option>
     </select><br>
 
     <button onclick="guardarDatos()">Entrar</button>
@@ -116,14 +117,11 @@
       <button type="submit">🔄 Reiniciar buzzer</button>
     </form>
 
-    <form action="/toggle" method="post" onsubmit="return insertarClave(this)">
-      <input type="hidden" name="clave">
-      <label class="switch">
-        <input type="checkbox" id="toggleSwitch" onchange="this.form.submit()">
-        <span class="slider"></span>
-      </label>
-      <span id="labelToggle">(Chicharra habilitada)</span>
-    </form>
+    <label class="switch">
+      <input type="checkbox" id="toggleSwitch">
+      <span class="slider"></span>
+    </label>
+    <span id="labelToggle">(Chicharra habilitada)</span>
 
     <form action="/sumar" method="post" onsubmit="return insertarClave(this)">
       <select id="jugador" name="jugador" required>
@@ -132,10 +130,19 @@
       <input type="hidden" name="clave">
       <button type="submit">➕ Sumar punto</button>
     </form>
+
+    <form action="/restar" method="post" onsubmit="return insertarClave(this)">
+      <select id="jugadorRestar" name="jugador" required>
+        <option disabled selected>Selecciona un jugador</option>
+      </select>
+      <input type="hidden" name="clave">
+      <button type="submit">➖ Restar punto</button>
+    </form>
   </div>
 
   <script>
     const defaultMesas = {
+      "HOST": "HOST",
       "Karina": "Mesa Maria Mitchell", "Poly": "Mesa Maria Mitchell", "Mariana": "Mesa Maria Mitchell",
       "Arturo": "Mesa Maria Mitchell", "Mike": "Mesa Maria Mitchell", "Isi": "Mesa Maria Mitchell",
       "Tito": "Mesa Maria Mitchell", "Katthy": "Mesa Maria Mitchell",
@@ -186,6 +193,9 @@
         document.getElementById("buzzer").style.display = "block";
         document.getElementById("nombre_hidden").value = usuario;
         document.getElementById("usuarioActivo").textContent = `Jugador: ${usuario}`;
+        if (usuario.includes("HOST")) {
+          document.getElementById("formBuzz").style.display = "none";
+        }
       }
     }
 
@@ -234,6 +244,16 @@
       }
     }
 
+    document.getElementById("toggleSwitch").addEventListener("change", async function () {
+      const estado = this.checked;
+      const clave = localStorage.getItem("claveHost");
+      await fetch("/toggle", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `clave=${clave}&estado=${estado}`
+      });
+    });
+
     function activarHost() {
       const clave = document.getElementById("claveHost").value;
       if (clave === "123") {
@@ -257,14 +277,17 @@
     async function cargarJugadores() {
       const res = await fetch("/jugadores");
       const data = await res.json();
-      const select = document.getElementById("jugador");
-      if (!select) return;
-      select.innerHTML = '<option disabled selected>Selecciona un jugador</option>';
-      for (let jugador in data) {
-        const option = document.createElement("option");
-        option.value = jugador;
-        option.textContent = jugador;
-        select.appendChild(option);
+      const selects = ["jugador", "jugadorRestar"];
+      for (const id of selects) {
+        const select = document.getElementById(id);
+        if (!select) continue;
+        select.innerHTML = '<option disabled selected>Selecciona un jugador</option>';
+        for (let jugador in data) {
+          const option = document.createElement("option");
+          option.value = jugador;
+          option.textContent = jugador;
+          select.appendChild(option);
+        }
       }
     }
 
