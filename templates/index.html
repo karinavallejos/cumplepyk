@@ -1,195 +1,203 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Chicharra Virtual</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body { text-align: center; font-family: sans-serif; padding: 2em; }
-        button { padding: 1em 2em; font-size: 1.5em; }
-        input, select { font-size: 1.2em; padding: 0.5em; margin: 0.5em; }
-        .ranking { margin-top: 2em; }
-        table { margin: auto; border-collapse: collapse; }
-        th, td { border: 1px solid #ccc; padding: 8px 16px; }
-    </style>
+  <title>Chicharra Virtual</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body { text-align: center; font-family: sans-serif; padding: 2em; }
+    button, select, input { font-size: 1.2em; padding: 0.5em; margin: 0.5em; }
+    .chicharra-btn {
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      font-size: 1.5em;
+      font-weight: bold;
+      border: none;
+      color: white;
+    }
+    .activo { background-color: #28a745; }
+    .bloqueado { background-color: #888; }
+    table { margin: auto; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 8px 16px; }
+    .ranking { margin-top: 2em; }
+    #panelHost { margin-top: 4em; padding-top: 2em; border-top: 2px solid #aaa; }
+  </style>
 </head>
 <body>
-    <h1>🔔 Chicharra Virtual</h1>
+  <h1>🔔 Chicharra Virtual</h1>
 
-    <div id="registro">
-        <p><strong>Selecciona tu nombre</strong></p>
-        <select id="nombre">
-            <option disabled selected>Selecciona tu nombre</option>
-            <optgroup label="Maria Mitchell">
-                <option>Karina</option>
-                <option>Poly</option>
-                <option>Mariana</option>
-                <option>Arturo</option>
-                <option>Mike</option>
-                <option>Isi</option>
-                <option>Tito</option>
-                <option>Katthy</option>
-            </optgroup>
-            <optgroup label="Caroline Herschel">
-                <option>Inés</option>
-                <option>Angela</option>
-                <option>Loreto</option>
-                <option>Daisy</option>
-                <option>Jaime</option>
-                <option>Myriam</option>
-                <option>M.Elena</option>
-            </optgroup>
-            <optgroup label="Annie Jump Cannon">
-                <option>Tito</option>
-                <option>Cristian</option>
-                <option>Coté</option>
-                <option>Tabi</option>
-                <option>Danny</option>
-                <option>Max</option>
-                <option>Tati</option>
-            </optgroup>
-            <optgroup label="Jocelyn Bell Burnell">
-                <option>Lis</option>
-                <option>Yossebann</option>
-                <option>Cata</option>
-                <option>Tamara</option>
-                <option>Diego</option>
-                <option>Nacha</option>
-                <option>Pipe</option>
-            </optgroup>
-            <optgroup label="Cecilia Payne-Gaposchkin">
-                <option>Pame</option>
-                <option>Pedro</option>
-                <option>Loro</option>
-                <option>David</option>
-                <option>Jorge</option>
-                <option>Coni</option>
-                <option>Carla</option>
-                <option>Damian</option>
-            </optgroup>
-            <optgroup label="Henrietta Swan Leavitt">
-                <option>Manu</option>
-                <option>Maruan</option>
-                <option>Ali</option>
-                <option>Dayanne</option>
-                <option>Eduardo</option>
-                <option>Rolando</option>
-                <option>Javi</option>
-            </optgroup>
-        </select>
+  <div id="registro">
+    <p><strong>Selecciona tu nombre</strong></p>
+    <select id="nombre">
+      <option disabled selected>Selecciona tu nombre</option>
+    </select>
 
-        <p><strong>Selecciona la mesa con la que jugarás</strong></p>
-        <select id="mesa">
-            <option>Mesa Maria Mitchell</option>
-            <option>Mesa Caroline Herschel</option>
-            <option>Mesa Annie Jump Cannon</option>
-            <option>Mesa Jocelyn Bell Burnell</option>
-            <option>Mesa Cecilia Payne-Gaposchkin</option>
-            <option>Mesa Henrietta Swan Leavitt</option>
-        </select><br>
+    <p><strong>Mesa</strong></p>
+    <select id="mesa">
+      <option>Mesa Maria Mitchell</option>
+      <option>Mesa Caroline Herschel</option>
+      <option>Mesa Annie Jump Cannon</option>
+      <option>Mesa Jocelyn Bell Burnell</option>
+      <option>Mesa Cecilia Payne-Gaposchkin</option>
+      <option>Mesa Henrietta Swan Leavitt</option>
+    </select><br>
 
-        <button onclick="guardarDatos()">Entrar</button>
-    </div>
+    <button onclick="guardarDatos()">Entrar</button>
+  </div>
 
-    <div id="buzzer" style="display:none;">
-        <p id="usuarioActivo"></p>
-        <form id="formBuzz" action="/buzz" method="post">
-            <input type="hidden" id="nombre_hidden" name="nombre">
-            <button type="submit">🔔 ¡BUZZ!</button>
-        </form>
-    </div>
+  <div id="buzzer" style="display:none;">
+    <p id="usuarioActivo"></p>
+    <form id="formBuzz" action="/buzz" method="post">
+      <input type="hidden" id="nombre_hidden" name="nombre">
+      <button id="buzzerButton" type="submit" class="chicharra-btn">CHICHARRA</button>
+    </form>
+    <div id="estadoBuzzer"></div>
+  </div>
 
-    <div class="ranking">
-        <h2>Orden de pulsación</h2>
-        <ul id="lista"></ul>
-    </div>
+  <div class="ranking">
+    <h2>Orden de pulsación</h2>
+    <ul id="lista"></ul>
+  </div>
 
-    <div class="ranking">
-        <h2>Puntaje por mesa</h2>
-        <table id="tablaPuntos">
-            <thead><tr><th>Mesa</th><th>Puntos</th></tr></thead>
-            <tbody></tbody>
-        </table>
-    </div>
+  <div class="ranking">
+    <h2>Puntaje por mesa</h2>
+    <table id="tablaPuntos">
+      <thead><tr><th>Mesa</th><th>Puntos</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-    <script>
-        function guardarDatos() {
-            const nombre = document.getElementById("nombre").value.trim();
-            const mesa = document.getElementById("mesa").value;
-            if (!nombre || !mesa) {
-                alert("Debes seleccionar tu nombre y mesa.");
-                return;
-            }
-            const usuario = `${nombre} (${mesa})`;
-            localStorage.setItem("usuario", usuario);
-            mostrarBuzzer();
-        }
+  <div id="panelHost">
+    <h2>🔐 Panel del Host</h2>
 
-        function mostrarBuzzer() {
-            const usuario = localStorage.getItem("usuario");
-            if (usuario) {
-                document.getElementById("registro").style.display = "none";
-                document.getElementById("buzzer").style.display = "block";
-                document.getElementById("nombre_hidden").value = usuario;
-                document.getElementById("usuarioActivo").textContent = `Jugador: ${usuario}`;
-            }
-        }
-
-        async function actualizar() {
-            const res = await fetch("/estado");
-            const datos = await res.json();
-            const lista = document.getElementById("lista");
-            lista.innerHTML = "";
-            datos.forEach((item, index) => {
-                const li = document.createElement("li");
-                li.textContent = `${index + 1}. ${item.nombre} - ${item.hora}`;
-                lista.appendChild(li);
-            });
-
-            const puntosRes = await fetch("/puntos");
-            const puntos = await puntosRes.json();
-            const tabla = document.querySelector("#tablaPuntos tbody");
-            tabla.innerHTML = "";
-            for (let mesa in puntos) {
-                const fila = document.createElement("tr");
-                fila.innerHTML = `<td>${mesa}</td><td>${puntos[mesa]}</td>`;
-                tabla.appendChild(fila);
-            }
-        }
-
-        async function cargarJugadores() {
-            const res = await fetch("/jugadores");
-            const data = await res.json();
-            const select = document.getElementById("jugador");
-            if (!select) return;
-            select.innerHTML = '<option disabled selected>Selecciona un jugador</option>';
-            for (let jugador in data) {
-                const option = document.createElement("option");
-                option.value = jugador;
-                option.textContent = jugador;
-                select.appendChild(option);
-            }
-        }
-
-        mostrarBuzzer();
-        setInterval(actualizar, 1000);
-        setInterval(cargarJugadores, 3000);
-    </script>
-
-    <br><br>
     <form action="/reset" method="post">
-        <input type="password" name="clave" placeholder="Clave del host para reiniciar">
-        <button type="submit">🔁 Reiniciar buzzer</button>
+      <input type="password" name="clave" placeholder="Clave del host (123)">
+      <button type="submit">🔄 Reiniciar buzzer</button>
     </form>
 
-    <br><hr>
-    <h3>👑 Panel del host: Sumar puntos</h3>
+    <form action="/toggle" method="post">
+      <input type="password" name="clave" placeholder="Clave del host (123)">
+      <button type="submit">🛑 Bloquear/Desbloquear Chicharra</button>
+    </form>
+
     <form action="/sumar" method="post">
-        <select id="jugador" name="jugador" required>
-            <option disabled selected>Selecciona un jugador</option>
-        </select>
-        <input type="password" name="clave" placeholder="Clave del host" required>
-        <button type="submit">➕ Sumar punto</button>
+      <select id="jugador" name="jugador" required>
+        <option disabled selected>Selecciona un jugador</option>
+      </select>
+      <input type="password" name="clave" placeholder="Clave del host (123)" required>
+      <button type="submit">➕ Sumar punto</button>
     </form>
+  </div>
 
+  <script>
+    const defaultMesas = {
+      "Karina": "Mesa Maria Mitchell", "Poly": "Mesa Maria Mitchell", "Mariana": "Mesa Maria Mitchell",
+      "Arturo": "Mesa Maria Mitchell", "Mike": "Mesa Maria Mitchell", "Isi": "Mesa Maria Mitchell",
+      "Tito": "Mesa Maria Mitchell", "Katthy": "Mesa Maria Mitchell",
+      "Inés": "Mesa Caroline Herschel", "Angela": "Mesa Caroline Herschel", "Loreto": "Mesa Caroline Herschel",
+      "Daisy": "Mesa Caroline Herschel", "Jaime": "Mesa Caroline Herschel", "Myriam": "Mesa Caroline Herschel",
+      "M.Elena": "Mesa Caroline Herschel",
+      "Cristian": "Mesa Annie Jump Cannon", "Coté": "Mesa Annie Jump Cannon", "Tabi": "Mesa Annie Jump Cannon",
+      "Danny": "Mesa Annie Jump Cannon", "Max": "Mesa Annie Jump Cannon", "Tati": "Mesa Annie Jump Cannon",
+      "Lis": "Mesa Jocelyn Bell Burnell", "Yossebann": "Mesa Jocelyn Bell Burnell", "Cata": "Mesa Jocelyn Bell Burnell",
+      "Tamara": "Mesa Jocelyn Bell Burnell", "Diego": "Mesa Jocelyn Bell Burnell", "Nacha": "Mesa Jocelyn Bell Burnell",
+      "Pipe": "Mesa Jocelyn Bell Burnell",
+      "Pame": "Mesa Cecilia Payne-Gaposchkin", "Pedro": "Mesa Cecilia Payne-Gaposchkin", "Loro": "Mesa Cecilia Payne-Gaposchkin",
+      "David": "Mesa Cecilia Payne-Gaposchkin", "Jorge": "Mesa Cecilia Payne-Gaposchkin", "Coni": "Mesa Cecilia Payne-Gaposchkin",
+      "Carla": "Mesa Cecilia Payne-Gaposchkin", "Damian": "Mesa Cecilia Payne-Gaposchkin",
+      "Manu": "Mesa Henrietta Swan Leavitt", "Maruan": "Mesa Henrietta Swan Leavitt", "Ali": "Mesa Henrietta Swan Leavitt",
+      "Dayanne": "Mesa Henrietta Swan Leavitt", "Eduardo": "Mesa Henrietta Swan Leavitt", "Rolando": "Mesa Henrietta Swan Leavitt",
+      "Javi": "Mesa Henrietta Swan Leavitt"
+    };
+
+    function guardarDatos() {
+      const nombre = document.getElementById("nombre").value.trim();
+      const mesa = document.getElementById("mesa").value;
+      const usuario = `${nombre} (${mesa})`;
+      localStorage.setItem("usuario", usuario);
+      mostrarBuzzer();
+    }
+
+    function mostrarBuzzer() {
+      const usuario = localStorage.getItem("usuario");
+      if (usuario) {
+        document.getElementById("registro").style.display = "none";
+        document.getElementById("buzzer").style.display = "block";
+        document.getElementById("nombre_hidden").value = usuario;
+        document.getElementById("usuarioActivo").textContent = `Jugador: ${usuario}`;
+      }
+    }
+
+    async function actualizar() {
+      const res = await fetch("/estado");
+      const datos = await res.json();
+      const lista = document.getElementById("lista");
+      lista.innerHTML = "";
+      datos.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.textContent = `${index + 1}. ${item.nombre} - ${item.hora}`;
+        lista.appendChild(li);
+      });
+
+      const puntosRes = await fetch("/puntos");
+      const puntos = await puntosRes.json();
+      const tabla = document.querySelector("#tablaPuntos tbody");
+      tabla.innerHTML = "";
+      for (let mesa in puntos) {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `<td>${mesa}</td><td>${puntos[mesa]}</td>`;
+        tabla.appendChild(fila);
+      }
+
+      const estado = await fetch("/buzzer_estado");
+      const buzzer = await estado.json();
+      const buzzerBtn = document.getElementById("buzzerButton");
+
+      if (buzzer.activo) {
+        buzzerBtn.disabled = false;
+        buzzerBtn.classList.add("activo");
+        buzzerBtn.classList.remove("bloqueado");
+      } else {
+        buzzerBtn.disabled = true;
+        buzzerBtn.classList.remove("activo");
+        buzzerBtn.classList.add("bloqueado");
+      }
+    }
+
+    async function cargarJugadores() {
+      const res = await fetch("/jugadores");
+      const data = await res.json();
+      const select = document.getElementById("jugador");
+      if (!select) return;
+      select.innerHTML = '<option disabled selected>Selecciona un jugador</option>';
+      for (let jugador in data) {
+        const option = document.createElement("option");
+        option.value = jugador;
+        option.textContent = jugador;
+        select.appendChild(option);
+      }
+    }
+
+    // Autocompletar mesa al seleccionar nombre
+    document.addEventListener("DOMContentLoaded", () => {
+      const nombreSelect = document.getElementById("nombre");
+      for (let nombre in defaultMesas) {
+        const option = document.createElement("option");
+        option.value = nombre;
+        option.textContent = nombre;
+        nombreSelect.appendChild(option);
+      }
+      nombreSelect.addEventListener("change", () => {
+        const seleccion = nombreSelect.value;
+        if (defaultMesas[seleccion]) {
+          document.getElementById("mesa").value = defaultMesas[seleccion];
+        }
+      });
+    });
+
+    mostrarBuzzer();
+    setInterval(actualizar, 1000);
+    setInterval(cargarJugadores, 3000);
+  </script>
 </body>
 </html>
+
