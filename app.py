@@ -8,7 +8,7 @@ clicks = []
 usuarios = {}  # jugador → mesa
 puntos = {}     # mesa → puntos
 buzzer_activo = True
-CLAVE_HOST = "123"
+CLAVE_HOST = "Karina123"
 
 @app.route("/")
 def index():
