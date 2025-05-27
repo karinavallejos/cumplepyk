@@ -1,4 +1,4 @@
-# app.py (modificado)
+# app.py (corregido)
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from datetime import datetime
 
@@ -58,7 +58,7 @@ def sumar():
         mesa = usuarios[jugador]
         puntos[mesa] = puntos.get(mesa, 0) + 1
 
-    return redirect(url_for("index"))
+    return ("", 204)
 
 @app.route("/restar", methods=["POST"])
 def restar():
@@ -69,15 +69,15 @@ def restar():
         mesa = usuarios[jugador]
         puntos[mesa] = max(0, puntos.get(mesa, 0) - 1)
 
-    return redirect(url_for("index"))
+    return ("", 204)
 
 @app.route("/reset", methods=["POST"])
 def reset():
     global clicks
     clave = request.form.get("clave")
     if clave == CLAVE_HOST:
-        clicks = []
-    return redirect(url_for("index"))
+        clicks.clear()
+    return ("", 204)
 
 @app.route("/toggle", methods=["POST"])
 def toggle():
@@ -86,7 +86,7 @@ def toggle():
     estado = request.form.get("estado")
     if clave == CLAVE_HOST:
         buzzer_activo = estado == "true"
-    return ('', 204)  # no redirección, solo respuesta vacía
+    return ("", 204)
 
 @app.route("/buzzer_estado")
 def buzzer_estado():
@@ -94,4 +94,5 @@ def buzzer_estado():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
