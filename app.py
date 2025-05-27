@@ -1,5 +1,4 @@
-# app.py (corregido y listo para trabajar con frontend sin recargas)
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from datetime import datetime
 
 app = Flask(__name__)
@@ -8,7 +7,7 @@ clicks = []
 usuarios = {}  # jugador → mesa
 puntos = {}     # mesa → puntos
 buzzer_activo = True
-CLAVE_HOST = "Karina123"
+CLAVE_HOST = "123"
 
 @app.route("/")
 def index():
@@ -18,11 +17,11 @@ def index():
 def buzz():
     global clicks
     if not buzzer_activo:
-        return ("", 204)
+        return redirect(url_for("index"))
 
     nombre = request.form.get("nombre")
     if not nombre:
-        return ("", 204)
+        return redirect(url_for("index"))
 
     if nombre not in [c['nombre'] for c in clicks]:
         clicks.append({
@@ -35,7 +34,7 @@ def buzz():
                 usuarios[nombre] = mesa
                 puntos.setdefault(mesa, 0)
 
-    return ("", 204)
+    return redirect(url_for("index"))
 
 @app.route("/estado")
 def estado():
@@ -58,35 +57,23 @@ def sumar():
         mesa = usuarios[jugador]
         puntos[mesa] = puntos.get(mesa, 0) + 1
 
-    return ("", 204)
-
-@app.route("/restar", methods=["POST"])
-def restar():
-    clave = request.form.get("clave")
-    jugador = request.form.get("jugador")
-
-    if clave == CLAVE_HOST and jugador in usuarios:
-        mesa = usuarios[jugador]
-        puntos[mesa] = max(0, puntos.get(mesa, 0) - 1)
-
-    return ("", 204)
+    return redirect(url_for("index"))
 
 @app.route("/reset", methods=["POST"])
 def reset():
     global clicks
     clave = request.form.get("clave")
     if clave == CLAVE_HOST:
-        clicks.clear()
-    return ("", 204)
+        clicks = []
+    return redirect(url_for("index"))
 
 @app.route("/toggle", methods=["POST"])
 def toggle():
     global buzzer_activo
     clave = request.form.get("clave")
-    estado = request.form.get("estado")
     if clave == CLAVE_HOST:
-        buzzer_activo = estado == "true"
-    return ("", 204)
+        buzzer_activo = not buzzer_activo
+    return redirect(url_for("index"))
 
 @app.route("/buzzer_estado")
 def buzzer_estado():
