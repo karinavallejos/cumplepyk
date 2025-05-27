@@ -101,7 +101,7 @@
 
   <div id="panelHost">
     <h2>🔐 Panel del Host</h2>
-    <label><strong>Clave:</strong> <input type="password" id="claveHost" placeholder="123"></label>
+    <label><strong>Clave:</strong> <input type="password" id="claveHost" placeholder="SOLO HOST"></label>
     <button onclick="activarHost()">🔓 Activar</button>
 
     <br><br>
@@ -201,7 +201,7 @@
 
     function activarHost() {
       const clave = document.getElementById("claveHost").value;
-      if (clave === "123") {
+      if (clave === "Karina123") {
         localStorage.setItem("claveHost", clave);
         alert("Acceso de host activado");
       } else {
