@@ -1,4 +1,3 @@
-# app.py (reparado con restar, sumar y reinicio funcionando)
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from datetime import datetime
 
@@ -57,17 +56,6 @@ def sumar():
     if clave == CLAVE_HOST and jugador in usuarios:
         mesa = usuarios[jugador]
         puntos[mesa] = puntos.get(mesa, 0) + 1
-
-    return redirect(url_for("index"))
-
-@app.route("/restar", methods=["POST"])
-def restar():
-    clave = request.form.get("clave")
-    jugador = request.form.get("jugador")
-
-    if clave == CLAVE_HOST and jugador in usuarios:
-        mesa = usuarios[jugador]
-        puntos[mesa] = max(0, puntos.get(mesa, 0) - 1)
 
     return redirect(url_for("index"))
 
