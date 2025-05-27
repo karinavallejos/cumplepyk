@@ -7,7 +7,7 @@ clicks = []
 usuarios = {}  # jugador → mesa
 puntos = {}     # mesa → puntos
 buzzer_activo = True
-CLAVE_HOST = "123"
+CLAVE_HOST = "Karina123"
 
 @app.route("/")
 def index():
@@ -81,5 +81,16 @@ def buzzer_estado():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.route("/restar", methods=["POST"])
+def restar():
+    clave = request.form.get("clave")
+    jugador = request.form.get("jugador")
+
+    if clave == CLAVE_HOST and jugador in usuarios:
+        mesa = usuarios[jugador]
+        puntos[mesa] = max(0, puntos.get(mesa, 0) - 1)
+
+    return redirect(url_for("index"))
 
 
