@@ -6,17 +6,34 @@
     <style>
         body { text-align: center; font-family: sans-serif; padding: 2em; }
         button { padding: 1em 2em; font-size: 1.5em; }
-        input { font-size: 1.2em; padding: 0.5em; margin-bottom: 1em; }
+        input, select { font-size: 1.2em; padding: 0.5em; margin: 0.5em; }
         .ranking { margin-top: 2em; }
     </style>
 </head>
 <body>
-    <h1>¡Presiona la chicharra!</h1>
-    <form action="/buzz" method="post">
-        <input type="text" name="nombre" placeholder="Nombre o mesa" required>
-        <br><br>
-        <button type="submit">🔔 BUZZ</button>
-    </form>
+    <h1>🔔 Chicharra Virtual</h1>
+
+    <div id="registro">
+        <p><strong>Selecciona tu nombre y mesa</strong></p>
+        <input id="nombre" placeholder="Tu nombre">
+        <select id="mesa">
+            <option disabled selected>Mesa</option>
+            <option>Mesa 1</option>
+            <option>Mesa 2</option>
+            <option>Mesa 3</option>
+            <option>Mesa 4</option>
+            <option>Mesa 5</option>
+        </select><br>
+        <button onclick="guardarDatos()">Entrar</button>
+    </div>
+
+    <div id="buzzer" style="display:none;">
+        <p id="usuarioActivo"></p>
+        <form id="formBuzz" action="/buzz" method="post">
+            <input type="hidden" id="nombre_hidden" name="nombre">
+            <button type="submit">🔔 ¡BUZZ!</button>
+        </form>
+    </div>
 
     <div class="ranking">
         <h2>Orden de pulsación</h2>
@@ -24,6 +41,28 @@
     </div>
 
     <script>
+        function guardarDatos() {
+            const nombre = document.getElementById("nombre").value.trim();
+            const mesa = document.getElementById("mesa").value;
+            if (!nombre || mesa === "Mesa") {
+                alert("Completa tu nombre y selecciona una mesa.");
+                return;
+            }
+            const usuario = `${nombre} (${mesa})`;
+            localStorage.setItem("usuario", usuario);
+            mostrarBuzzer();
+        }
+
+        function mostrarBuzzer() {
+            const usuario = localStorage.getItem("usuario");
+            if (usuario) {
+                document.getElementById("registro").style.display = "none";
+                document.getElementById("buzzer").style.display = "block";
+                document.getElementById("nombre_hidden").value = usuario;
+                document.getElementById("usuarioActivo").textContent = `Jugador: ${usuario}`;
+            }
+        }
+
         async function actualizar() {
             const res = await fetch("/estado");
             const datos = await res.json();
@@ -35,9 +74,16 @@
                 lista.appendChild(li);
             });
         }
+
+        mostrarBuzzer();
         setInterval(actualizar, 1000);
     </script>
 
-    <br><a href="/reset">🔁 Reiniciar</a>
+    <br><br>
+    <form action="/reset" method="post">
+        <input type="password" name="clave" placeholder="Clave del host para reiniciar">
+        <button type="submit">🔁 Reiniciar (solo host)</button>
+    </form>
+
 </body>
 </html>
