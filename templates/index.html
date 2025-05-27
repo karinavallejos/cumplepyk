@@ -107,7 +107,7 @@
 
   <div id="panelHost">
     <h2>🔐 Panel del Host</h2>
-    <label><strong>Clave:</strong> <input type="password" id="claveHost" placeholder="..."></label>
+    <label><strong>Clave:</strong> <input type="password" id="claveHost" placeholder="123"></label>
     <button onclick="activarHost()">🔓 Activar</button>
 
     <br><br>
@@ -132,14 +132,15 @@
       <input type="hidden" name="clave">
       <button type="submit">➕ Sumar punto</button>
     </form>
+    <form action="/restar" method="post" onsubmit="return insertarClave(this)">
+      <select id="jugadorRestar" name="jugador" required>
+        <option disabled selected>Selecciona un jugador</option>
+      </select>
+      <input type="hidden" name="clave">
+      <button type="submit">➖ Restar punto</button>
+    </form>
+
   </div>
-  <form action="/restar" method="post" onsubmit="return insertarClave(this)">
-    <select id="jugadorRestar" name="jugador" required>
-      <option disabled selected>Selecciona un jugador</option>
-    </select>
-    <input type="hidden" name="clave">
-    <button type="submit">➖ Restar punto</button>
-  </form>
 
   <script>
     const defaultMesas = {
@@ -261,29 +262,24 @@
       return true;
     }
 
+    
     async function cargarJugadores() {
       const res = await fetch("/jugadores");
       const data = await res.json();
       const selects = ["jugador", "jugadorRestar"];
       selects.forEach(id => {
-      const select = document.getElementById(id);
-      if (!select) return;
-      select.innerHTML = '<option disabled selected>Selecciona un jugador</option>';
-      for (let jugador in data) {
-        const option = document.createElement("option");
-        option.value = jugador;
-        option.textContent = jugador;
-        select.appendChild(option);
-  }
-});
-      if (!select) return;
-      select.innerHTML = '<option disabled selected>Selecciona un jugador</option>';
-      for (let jugador in data) {
-        const option = document.createElement("option");
-        option.value = jugador;
-        option.textContent = jugador;
-        select.appendChild(option);
-      }
+        const select = document.getElementById(id);
+        if (!select) return;
+        select.innerHTML = '<option disabled selected>Selecciona un jugador</option>';
+        for (let jugador in data) {
+          const option = document.createElement("option");
+          option.value = jugador;
+          option.textContent = jugador;
+          select.appendChild(option);
+        }
+      });
+    }
+
     }
 
     mostrarBuzzer();
@@ -292,4 +288,5 @@
   </script>
 </body>
 </html>
+
 
