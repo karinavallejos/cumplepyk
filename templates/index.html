@@ -294,6 +294,32 @@
     mostrarBuzzer();
     setInterval(actualizar, 1000);
     setInterval(cargarJugadores, 3000);
+    // Sumar punto sin recarga
+const formSumar = document.querySelector('form[action="/sumar"]');
+formSumar.addEventListener("submit", async function (e) {
+  e.preventDefault();
+  if (!insertarClave(this)) return;
+  const data = new URLSearchParams(new FormData(this));
+  await fetch("/sumar", { method: "POST", body: data });
+});
+
+// Restar punto sin recarga
+const formRestar = document.querySelector('form[action="/restar"]');
+formRestar.addEventListener("submit", async function (e) {
+  e.preventDefault();
+  if (!insertarClave(this)) return;
+  const data = new URLSearchParams(new FormData(this));
+  await fetch("/restar", { method: "POST", body: data });
+});
+
+// Reiniciar buzzer sin recarga
+const formReset = document.querySelector('form[action="/reset"]');
+formReset.addEventListener("submit", async function (e) {
+  e.preventDefault();
+  if (!insertarClave(this)) return;
+  const data = new URLSearchParams(new FormData(this));
+  await fetch("/reset", { method: "POST", body: data });
+});
   </script>
 </body>
 </html>
