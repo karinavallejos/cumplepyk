@@ -7,7 +7,7 @@ clicks = []
 usuarios = {}  # jugador → mesa
 puntos = {}     # mesa → puntos
 buzzer_activo = True
-CLAVE_HOST = "Karina123"
+CLAVE_HOST = "123"
 
 @app.route("/")
 def index():
@@ -81,4 +81,5 @@ def buzzer_estado():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
