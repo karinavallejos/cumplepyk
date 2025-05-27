@@ -8,22 +8,84 @@
         button { padding: 1em 2em; font-size: 1.5em; }
         input, select { font-size: 1.2em; padding: 0.5em; margin: 0.5em; }
         .ranking { margin-top: 2em; }
+        table { margin: auto; border-collapse: collapse; }
+        th, td { border: 1px solid #ccc; padding: 8px 16px; }
     </style>
 </head>
 <body>
     <h1>🔔 Chicharra Virtual</h1>
 
     <div id="registro">
-        <p><strong>Selecciona tu nombre y mesa</strong></p>
-        <input id="nombre" placeholder="Tu nombre">
+        <p><strong>Selecciona tu nombre</strong></p>
+        <select id="nombre">
+            <option disabled selected>Selecciona tu nombre</option>
+            <optgroup label="Maria Mitchell">
+                <option>Karina</option>
+                <option>Poly</option>
+                <option>Mariana</option>
+                <option>Arturo</option>
+                <option>Mike</option>
+                <option>Isi</option>
+                <option>Tito</option>
+                <option>Katthy</option>
+            </optgroup>
+            <optgroup label="Caroline Herschel">
+                <option>Inés</option>
+                <option>Angela</option>
+                <option>Loreto</option>
+                <option>Daisy</option>
+                <option>Jaime</option>
+                <option>Myriam</option>
+                <option>M.Elena</option>
+            </optgroup>
+            <optgroup label="Annie Jump Cannon">
+                <option>Cristian</option>
+                <option>Coté</option>
+                <option>Tabi</option>
+                <option>Danny</option>
+                <option>Max</option>
+                <option>Tati</option>
+            </optgroup>
+            <optgroup label="Jocelyn Bell Burnell">
+                <option>Lis</option>
+                <option>Yossebann</option>
+                <option>Cata</option>
+                <option>Tamara</option>
+                <option>Diego</option>
+                <option>Nacha</option>
+                <option>Pipe</option>
+            </optgroup>
+            <optgroup label="Cecilia Payne-Gaposchkin">
+                <option>Pame</option>
+                <option>Pedro</option>
+                <option>Loro</option>
+                <option>David</option>
+                <option>Jorge</option>
+                <option>Coni</option>
+                <option>Carla</option>
+                <option>Damian</option>
+            </optgroup>
+            <optgroup label="Henrietta Swan Leavitt">
+                <option>Manu</option>
+                <option>Maruan</option>
+                <option>Ali</option>
+                <option>Dayanne</option>
+                <option>Eduardo</option>
+                <option>Rolando</option>
+                <option>Javi</option>
+            </optgroup>
+        </select>
+
+        <p><strong>Selecciona la mesa con la que jugarás</strong></p>
         <select id="mesa">
-            <option disabled selected>Mesa</option>
-            <option>Mesa 1</option>
-            <option>Mesa 2</option>
-            <option>Mesa 3</option>
-            <option>Mesa 4</option>
-            <option>Mesa 5</option>
+            <option>Mesa Maria Mitchell</option>
+            <option>Mesa Caroline Herschel</option>
+            <option>Mesa Annie Jump Cannon</option>
+            <option>Mesa Jocelyn Bell Burnell</option>
+            <option>Mesa Cecilia Payne-Gaposchkin</option>
+            <option>Mesa Henrietta Swan Leavitt</option>
         </select><br>
+
         <button onclick="guardarDatos()">Entrar</button>
     </div>
 
@@ -40,12 +102,20 @@
         <ul id="lista"></ul>
     </div>
 
+    <div class="ranking">
+        <h2>Puntaje por mesa</h2>
+        <table id="tablaPuntos">
+            <thead><tr><th>Mesa</th><th>Puntos</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
     <script>
         function guardarDatos() {
             const nombre = document.getElementById("nombre").value.trim();
             const mesa = document.getElementById("mesa").value;
-            if (!nombre || mesa === "Mesa") {
-                alert("Completa tu nombre y selecciona una mesa.");
+            if (!nombre || !mesa) {
+                alert("Debes seleccionar tu nombre y mesa.");
                 return;
             }
             const usuario = `${nombre} (${mesa})`;
@@ -73,6 +143,16 @@
                 li.textContent = `${index + 1}. ${item.nombre} - ${item.hora}`;
                 lista.appendChild(li);
             });
+
+            const puntosRes = await fetch("/puntos");
+            const puntos = await puntosRes.json();
+            const tabla = document.querySelector("#tablaPuntos tbody");
+            tabla.innerHTML = "";
+            for (let mesa in puntos) {
+                const fila = document.createElement("tr");
+                fila.innerHTML = `<td>${mesa}</td><td>${puntos[mesa]}</td>`;
+                tabla.appendChild(fila);
+            }
         }
 
         mostrarBuzzer();
@@ -82,8 +162,17 @@
     <br><br>
     <form action="/reset" method="post">
         <input type="password" name="clave" placeholder="Clave del host para reiniciar">
-        <button type="submit">🔁 Reiniciar (solo host)</button>
+        <button type="submit">🔁 Reiniciar buzzer</button>
+    </form>
+
+    <br><hr>
+    <h3>👑 Panel del host: Sumar puntos</h3>
+    <form action="/sumar" method="post">
+        <input name="jugador" placeholder="Nombre completo con (Mesa)">
+        <input type="password" name="clave" placeholder="Clave del host">
+        <button type="submit">➕ Sumar punto</button>
     </form>
 
 </body>
 </html>
+
