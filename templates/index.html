@@ -119,7 +119,7 @@
     <form action="/toggle" method="post" onsubmit="return insertarClave(this)">
       <input type="hidden" name="clave">
       <label class="switch">
-        <input type="checkbox" id="toggleSwitch">
+        <input type="checkbox" id="toggleSwitch" onchange="this.form.submit()">
         <span class="slider"></span>
       </label>
       <span id="labelToggle">(Chicharra habilitada)</span>
@@ -153,10 +153,9 @@
       "Manu": "Mesa Henrietta Swan Leavitt", "Maruan": "Mesa Henrietta Swan Leavitt", "Ali": "Mesa Henrietta Swan Leavitt",
       "Dayanne": "Mesa Henrietta Swan Leavitt", "Eduardo": "Mesa Henrietta Swan Leavitt", "Rolando": "Mesa Henrietta Swan Leavitt",
       "Javi": "Mesa Henrietta Swan Leavitt"
-    }; // como antes
+    };
 
     document.addEventListener("DOMContentLoaded", () => {
-      // cargar nombres y mesas
       const nombreSelect = document.getElementById("nombre");
       for (let nombre in defaultMesas) {
         const option = document.createElement("option");
@@ -169,25 +168,6 @@
         if (defaultMesas[seleccion]) {
           document.getElementById("mesa").value = defaultMesas[seleccion];
         }
-      });
-
-      // evento dinámico del switch
-      const toggleSwitch = document.getElementById("toggleSwitch");
-      toggleSwitch.addEventListener("change", async () => {
-        const clave = localStorage.getItem("claveHost");
-        if (!clave) {
-          alert("Primero debes activar el modo host");
-          toggleSwitch.checked = !toggleSwitch.checked;
-          return;
-        }
-
-        await fetch("/toggle", {
-          method: "POST",
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: `clave=${clave}`
-        });
-
-        actualizar();
       });
     });
 
@@ -294,4 +274,3 @@
   </script>
 </body>
 </html>
-
