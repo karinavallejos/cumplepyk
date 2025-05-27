@@ -39,6 +39,7 @@
                 <option>M.Elena</option>
             </optgroup>
             <optgroup label="Annie Jump Cannon">
+                <option>Tito</option>
                 <option>Cristian</option>
                 <option>Coté</option>
                 <option>Tabi</option>
@@ -155,8 +156,23 @@
             }
         }
 
+        async function cargarJugadores() {
+            const res = await fetch("/jugadores");
+            const data = await res.json();
+            const select = document.getElementById("jugador");
+            if (!select) return;
+            select.innerHTML = '<option disabled selected>Selecciona un jugador</option>';
+            for (let jugador in data) {
+                const option = document.createElement("option");
+                option.value = jugador;
+                option.textContent = jugador;
+                select.appendChild(option);
+            }
+        }
+
         mostrarBuzzer();
         setInterval(actualizar, 1000);
+        setInterval(cargarJugadores, 3000);
     </script>
 
     <br><br>
@@ -168,11 +184,12 @@
     <br><hr>
     <h3>👑 Panel del host: Sumar puntos</h3>
     <form action="/sumar" method="post">
-        <input name="jugador" placeholder="Nombre completo con (Mesa)">
-        <input type="password" name="clave" placeholder="Clave del host">
+        <select id="jugador" name="jugador" required>
+            <option disabled selected>Selecciona un jugador</option>
+        </select>
+        <input type="password" name="clave" placeholder="Clave del host" required>
         <button type="submit">➕ Sumar punto</button>
     </form>
 
 </body>
 </html>
-
