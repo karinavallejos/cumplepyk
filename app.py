@@ -1,5 +1,5 @@
-# app.py (corregido)
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+# app.py (corregido y listo para trabajar con frontend sin recargas)
+from flask import Flask, render_template, request, jsonify
 from datetime import datetime
 
 app = Flask(__name__)
@@ -18,11 +18,11 @@ def index():
 def buzz():
     global clicks
     if not buzzer_activo:
-        return redirect(url_for("index"))
+        return ("", 204)
 
     nombre = request.form.get("nombre")
     if not nombre:
-        return redirect(url_for("index"))
+        return ("", 204)
 
     if nombre not in [c['nombre'] for c in clicks]:
         clicks.append({
@@ -35,7 +35,7 @@ def buzz():
                 usuarios[nombre] = mesa
                 puntos.setdefault(mesa, 0)
 
-    return redirect(url_for("index"))
+    return ("", 204)
 
 @app.route("/estado")
 def estado():
