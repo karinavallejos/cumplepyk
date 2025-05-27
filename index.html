@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chicharra Virtual</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { text-align: center; font-family: sans-serif; padding: 2em; }
+        button { padding: 1em 2em; font-size: 1.5em; }
+        input { font-size: 1.2em; padding: 0.5em; margin-bottom: 1em; }
+        .ranking { margin-top: 2em; }
+    </style>
+</head>
+<body>
+    <h1>¡Presiona la chicharra!</h1>
+    <form action="/buzz" method="post">
+        <input type="text" name="nombre" placeholder="Nombre o mesa" required>
+        <br><br>
+        <button type="submit">🔔 BUZZ</button>
+    </form>
+
+    <div class="ranking">
+        <h2>Orden de pulsación</h2>
+        <ul id="lista"></ul>
+    </div>
+
+    <script>
+        async function actualizar() {
+            const res = await fetch("/estado");
+            const datos = await res.json();
+            const lista = document.getElementById("lista");
+            lista.innerHTML = "";
+            datos.forEach((item, index) => {
+                const li = document.createElement("li");
+                li.textContent = `${index + 1}. ${item.nombre} - ${item.hora}`;
+                lista.appendChild(li);
+            });
+        }
+        setInterval(actualizar, 1000);
+    </script>
+
+    <br><a href="/reset">🔁 Reiniciar</a>
+</body>
+</html>
