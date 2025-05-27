@@ -1,3 +1,4 @@
+# app.py (modificado)
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from datetime import datetime
 
@@ -59,6 +60,17 @@ def sumar():
 
     return redirect(url_for("index"))
 
+@app.route("/restar", methods=["POST"])
+def restar():
+    clave = request.form.get("clave")
+    jugador = request.form.get("jugador")
+
+    if clave == CLAVE_HOST and jugador in usuarios:
+        mesa = usuarios[jugador]
+        puntos[mesa] = max(0, puntos.get(mesa, 0) - 1)
+
+    return redirect(url_for("index"))
+
 @app.route("/reset", methods=["POST"])
 def reset():
     global clicks
@@ -71,9 +83,10 @@ def reset():
 def toggle():
     global buzzer_activo
     clave = request.form.get("clave")
+    estado = request.form.get("estado")
     if clave == CLAVE_HOST:
-        buzzer_activo = not buzzer_activo
-    return redirect(url_for("index"))
+        buzzer_activo = estado == "true"
+    return ('', 204)  # no redirección, solo respuesta vacía
 
 @app.route("/buzzer_estado")
 def buzzer_estado():
@@ -81,3 +94,4 @@ def buzzer_estado():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
