@@ -53,6 +53,11 @@
     input:checked + .slider:before {
       transform: translateX(26px);
     }
+    #estadoGeneral {
+      font-size: 1.2em;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -79,6 +84,7 @@
 
   <div id="buzzer" style="display:none;">
     <p id="usuarioActivo"></p>
+    <div id="estadoGeneral"></div>
     <form id="formBuzz" action="/buzz" method="post">
       <input type="hidden" id="nombre_hidden" name="nombre">
       <button id="buzzerButton" type="submit" class="chicharra-btn">CHICHARRA</button>
@@ -101,7 +107,7 @@
 
   <div id="panelHost">
     <h2>🔐 Panel del Host</h2>
-    <label><strong>Clave:</strong> <input type="password" id="claveHost" placeholder="SOLO HOST"></label>
+    <label><strong>Clave:</strong> <input type="password" id="claveHost" placeholder="123"></label>
     <button onclick="activarHost()">🔓 Activar</button>
 
     <br><br>
@@ -116,6 +122,7 @@
         <input type="checkbox" id="toggleSwitch" onchange="this.form.submit()">
         <span class="slider"></span>
       </label>
+      <span id="labelToggle">(Chicharra habilitada)</span>
     </form>
 
     <form action="/sumar" method="post" onsubmit="return insertarClave(this)">
@@ -128,20 +135,41 @@
   </div>
 
   <script>
-    const defaultMesas = { "Karina": "Mesa Maria Mitchell", "Poly": "Mesa Maria Mitchell", "Mariana": "Mesa Maria Mitchell",
-      "Arturo": "Mesa Maria Mitchell", "Mike": "Mesa Maria Mitchell", "Isi": "Mesa Maria Mitchell", "Tito": "Mesa Maria Mitchell",
-      "Katthy": "Mesa Maria Mitchell", "Inés": "Mesa Caroline Herschel", "Angela": "Mesa Caroline Herschel",
-      "Loreto": "Mesa Caroline Herschel", "Daisy": "Mesa Caroline Herschel", "Jaime": "Mesa Caroline Herschel",
-      "Myriam": "Mesa Caroline Herschel", "M.Elena": "Mesa Caroline Herschel", "Cristian": "Mesa Annie Jump Cannon",
-      "Coté": "Mesa Annie Jump Cannon", "Tabi": "Mesa Annie Jump Cannon", "Danny": "Mesa Annie Jump Cannon",
-      "Max": "Mesa Annie Jump Cannon", "Tati": "Mesa Annie Jump Cannon", "Lis": "Mesa Jocelyn Bell Burnell",
-      "Yossebann": "Mesa Jocelyn Bell Burnell", "Cata": "Mesa Jocelyn Bell Burnell", "Tamara": "Mesa Jocelyn Bell Burnell",
-      "Diego": "Mesa Jocelyn Bell Burnell", "Nacha": "Mesa Jocelyn Bell Burnell", "Pipe": "Mesa Jocelyn Bell Burnell",
+    const defaultMesas = {
+      "Karina": "Mesa Maria Mitchell", "Poly": "Mesa Maria Mitchell", "Mariana": "Mesa Maria Mitchell",
+      "Arturo": "Mesa Maria Mitchell", "Mike": "Mesa Maria Mitchell", "Isi": "Mesa Maria Mitchell",
+      "Tito": "Mesa Maria Mitchell", "Katthy": "Mesa Maria Mitchell",
+      "Inés": "Mesa Caroline Herschel", "Angela": "Mesa Caroline Herschel", "Loreto": "Mesa Caroline Herschel",
+      "Daisy": "Mesa Caroline Herschel", "Jaime": "Mesa Caroline Herschel", "Myriam": "Mesa Caroline Herschel",
+      "M.Elena": "Mesa Caroline Herschel",
+      "Cristian": "Mesa Annie Jump Cannon", "Coté": "Mesa Annie Jump Cannon", "Tabi": "Mesa Annie Jump Cannon",
+      "Danny": "Mesa Annie Jump Cannon", "Max": "Mesa Annie Jump Cannon", "Tati": "Mesa Annie Jump Cannon",
+      "Lis": "Mesa Jocelyn Bell Burnell", "Yossebann": "Mesa Jocelyn Bell Burnell", "Cata": "Mesa Jocelyn Bell Burnell",
+      "Tamara": "Mesa Jocelyn Bell Burnell", "Diego": "Mesa Jocelyn Bell Burnell", "Nacha": "Mesa Jocelyn Bell Burnell",
+      "Pipe": "Mesa Jocelyn Bell Burnell",
       "Pame": "Mesa Cecilia Payne-Gaposchkin", "Pedro": "Mesa Cecilia Payne-Gaposchkin", "Loro": "Mesa Cecilia Payne-Gaposchkin",
       "David": "Mesa Cecilia Payne-Gaposchkin", "Jorge": "Mesa Cecilia Payne-Gaposchkin", "Coni": "Mesa Cecilia Payne-Gaposchkin",
-      "Carla": "Mesa Cecilia Payne-Gaposchkin", "Damian": "Mesa Cecilia Payne-Gaposchkin", "Manu": "Mesa Henrietta Swan Leavitt",
-      "Maruan": "Mesa Henrietta Swan Leavitt", "Ali": "Mesa Henrietta Swan Leavitt", "Dayanne": "Mesa Henrietta Swan Leavitt",
-      "Eduardo": "Mesa Henrietta Swan Leavitt", "Rolando": "Mesa Henrietta Swan Leavitt", "Javi": "Mesa Henrietta Swan Leavitt" };
+      "Carla": "Mesa Cecilia Payne-Gaposchkin", "Damian": "Mesa Cecilia Payne-Gaposchkin",
+      "Manu": "Mesa Henrietta Swan Leavitt", "Maruan": "Mesa Henrietta Swan Leavitt", "Ali": "Mesa Henrietta Swan Leavitt",
+      "Dayanne": "Mesa Henrietta Swan Leavitt", "Eduardo": "Mesa Henrietta Swan Leavitt", "Rolando": "Mesa Henrietta Swan Leavitt",
+      "Javi": "Mesa Henrietta Swan Leavitt"
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const nombreSelect = document.getElementById("nombre");
+      for (let nombre in defaultMesas) {
+        const option = document.createElement("option");
+        option.value = nombre;
+        option.textContent = nombre;
+        nombreSelect.appendChild(option);
+      }
+      nombreSelect.addEventListener("change", () => {
+        const seleccion = nombreSelect.value;
+        if (defaultMesas[seleccion]) {
+          document.getElementById("mesa").value = defaultMesas[seleccion];
+        }
+      });
+    });
 
     function guardarDatos() {
       const nombre = document.getElementById("nombre").value.trim();
@@ -185,23 +213,30 @@
       const estado = await fetch("/buzzer_estado");
       const buzzer = await estado.json();
       const buzzerBtn = document.getElementById("buzzerButton");
+      const estadoGeneral = document.getElementById("estadoGeneral");
+      const toggleSwitch = document.getElementById("toggleSwitch");
+      const labelToggle = document.getElementById("labelToggle");
 
       if (buzzer.activo) {
         buzzerBtn.disabled = false;
         buzzerBtn.classList.add("activo");
         buzzerBtn.classList.remove("bloqueado");
-        document.getElementById("toggleSwitch").checked = true;
+        toggleSwitch.checked = true;
+        labelToggle.textContent = "(Chicharra habilitada)";
+        estadoGeneral.textContent = "Estado: Habilitada";
       } else {
         buzzerBtn.disabled = true;
         buzzerBtn.classList.remove("activo");
         buzzerBtn.classList.add("bloqueado");
-        document.getElementById("toggleSwitch").checked = false;
+        toggleSwitch.checked = false;
+        labelToggle.textContent = "(Chicharra deshabilitada)";
+        estadoGeneral.textContent = "Estado: Deshabilitada";
       }
     }
 
     function activarHost() {
       const clave = document.getElementById("claveHost").value;
-      if (clave === "Karina123") {
+      if (clave === "123") {
         localStorage.setItem("claveHost", clave);
         alert("Acceso de host activado");
       } else {
@@ -232,22 +267,6 @@
         select.appendChild(option);
       }
     }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      const nombreSelect = document.getElementById("nombre");
-      for (let nombre in defaultMesas) {
-        const option = document.createElement("option");
-        option.value = nombre;
-        option.textContent = nombre;
-        nombreSelect.appendChild(option);
-      }
-      nombreSelect.addEventListener("change", () => {
-        const seleccion = nombreSelect.value;
-        if (defaultMesas[seleccion]) {
-          document.getElementById("mesa").value = defaultMesas[seleccion];
-        }
-      });
-    });
 
     mostrarBuzzer();
     setInterval(actualizar, 1000);
