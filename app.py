@@ -7,27 +7,26 @@ app = Flask(__name__)
 # Estado de la chicharra
 estado_buzzer = {"activo": True}
 
-# Lista de pulsaciones (quién apretó y a qué hora)
+# Lista de clics de chicharra
 pulsaciones = []
 
 # Puntaje por mesa
 puntos = defaultdict(int)
 
-# Jugadores registrados con su mesa
+# Diccionario de jugadores y sus mesas
 jugadores = {}
 
-# Clave para acceder como host
+# Clave de acceso del host
 CLAVE_HOST = "123"
 
 @app.route("/")
 def index():
-    return render_template("index.html")  # Asegúrate de tener templates/index.html
+    return render_template("index.html")  # Asegúrate de tener este archivo en /templates
 
 @app.route("/buzz", methods=["POST"])
 def buzz():
     if not estado_buzzer["activo"]:
         return redirect("/")
-
     nombre = request.form["nombre"]
     if nombre not in [p["nombre"] for p in pulsaciones]:
         hora = datetime.now().strftime("%H:%M:%S")
@@ -68,13 +67,10 @@ def sumar():
     clave = request.form.get("clave")
     if clave != CLAVE_HOST:
         return "Acceso denegado", 403
-
     jugador = request.form.get("jugador")
     mesa = jugadores.get(jugador)
-
     if mesa:
         puntos[mesa] += 1
-
     return redirect("/")
 
 @app.route("/guardar_jugador", methods=["POST"])
@@ -87,10 +83,14 @@ def guardar_jugador():
 
 @app.route("/jugadores")
 def jugadores_registrados():
-    return jsonify(jugadores)
+    # Mostrar solo los jugadores que apretaron la chicharra
+    activos = {nombre: mesa for nombre, mesa in jugadores.items()
+               if f"{nombre} ({mesa})" in [p["nombre"] for p in pulsaciones]}
+    return jsonify(activos)
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
