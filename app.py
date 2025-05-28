@@ -1,86 +1,97 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, request, jsonify, redirect, render_template
 from datetime import datetime
+from collections import defaultdict
 
 app = Flask(__name__)
 
-clicks = []
-usuarios = {}  # jugador → mesa
-puntos = {}     # mesa → puntos
-buzzer_activo = True
-CLAVE_HOST = "Karina123"
+# Estado de la chicharra
+estado_buzzer = {"activo": True}
+
+# Lista de pulsaciones (quién apretó y a qué hora)
+pulsaciones = []
+
+# Puntaje por mesa
+puntos = defaultdict(int)
+
+# Jugadores registrados con su mesa
+jugadores = {}
+
+# Clave para acceder como host
+CLAVE_HOST = "123"
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html")  # Asegúrate de tener templates/index.html
 
 @app.route("/buzz", methods=["POST"])
 def buzz():
-    global clicks
-    if not buzzer_activo:
-        return redirect(url_for("index"))
+    if not estado_buzzer["activo"]:
+        return redirect("/")
 
-    nombre = request.form.get("nombre")
-    if not nombre:
-        return redirect(url_for("index"))
-
-    if nombre not in [c['nombre'] for c in clicks]:
-        clicks.append({
-            "nombre": nombre,
-            "hora": datetime.now().strftime("%H:%M:%S")
-        })
-        if nombre not in usuarios:
-            if "(" in nombre and ")" in nombre:
-                mesa = nombre.split("(")[-1].replace(")", "").strip()
-                usuarios[nombre] = mesa
-                puntos.setdefault(mesa, 0)
-
-    return redirect(url_for("index"))
+    nombre = request.form["nombre"]
+    if nombre not in [p["nombre"] for p in pulsaciones]:
+        hora = datetime.now().strftime("%H:%M:%S")
+        pulsaciones.append({"nombre": nombre, "hora": hora})
+    return redirect("/")
 
 @app.route("/estado")
 def estado():
-    return jsonify(clicks)
+    return jsonify(pulsaciones)
 
 @app.route("/puntos")
-def ver_puntos():
-    return jsonify(puntos)
+def puntos_estado():
+    return jsonify(dict(puntos))
 
-@app.route("/jugadores")
-def jugadores():
-    return jsonify(usuarios)
+@app.route("/buzzer_estado")
+def buzzer_estado():
+    return jsonify(estado_buzzer)
+
+@app.route("/toggle", methods=["POST"])
+def toggle():
+    clave = request.form.get("clave")
+    if clave != CLAVE_HOST:
+        return "Acceso denegado", 403
+    estado_buzzer["activo"] = not estado_buzzer["activo"]
+    return redirect("/")
+
+@app.route("/reset", methods=["POST"])
+def reset():
+    clave = request.form.get("clave")
+    if clave != CLAVE_HOST:
+        return "Acceso denegado", 403
+    if estado_buzzer["activo"]:
+        pulsaciones.clear()
+    return redirect("/")
 
 @app.route("/sumar", methods=["POST"])
 def sumar():
     clave = request.form.get("clave")
+    if clave != CLAVE_HOST:
+        return "Acceso denegado", 403
+
     jugador = request.form.get("jugador")
+    mesa = jugadores.get(jugador)
 
-    if clave == CLAVE_HOST and jugador in usuarios:
-        mesa = usuarios[jugador]
-        puntos[mesa] = puntos.get(mesa, 0) + 1
+    if mesa:
+        puntos[mesa] += 1
 
-    return redirect(url_for("index"))
+    return redirect("/")
 
-@app.route("/reset", methods=["POST"])
-def reset():
-    global clicks
-    clave = request.form.get("clave")
-    if clave == CLAVE_HOST:
-        clicks = []
-    return redirect(url_for("index"))
+@app.route("/guardar_jugador", methods=["POST"])
+def guardar_jugador():
+    data = request.get_json()
+    nombre = data["nombre"]
+    mesa = data["mesa"]
+    jugadores[nombre] = mesa
+    return "", 204
 
-@app.route("/toggle", methods=["POST"])
-def toggle():
-    global buzzer_activo
-    clave = request.form.get("clave")
-    if clave == CLAVE_HOST:
-        buzzer_activo = not buzzer_activo
-    return redirect(url_for("index"))
-
-@app.route("/buzzer_estado")
-def buzzer_estado():
-    return jsonify({"activo": buzzer_activo})
+@app.route("/jugadores")
+def jugadores_registrados():
+    return jsonify(jugadores)
 
 if __name__ == "__main__":
     app.run(debug=True)
+
 
 
 
