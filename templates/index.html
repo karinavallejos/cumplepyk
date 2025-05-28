@@ -187,16 +187,23 @@
     });
   }
 
-    function mostrarBuzzer() {
-      const usuario = localStorage.getItem("usuario");
-      if (usuario) {
-        document.getElementById("registro").style.display = "none";
-        document.getElementById("buzzer").style.display = "block";
-        document.getElementById("nombre_hidden").value = usuario;
-        document.getElementById("usuarioActivo").textContent = `Jugador: ${usuario}`;
-      }
-    }
+  function mostrarBuzzer() {
+    const usuario = localStorage.getItem("usuario");
+    if (usuario) {
+      const [nombreCompleto, mesa] = usuario.match(/^(.+?) \((.+)\)$/).slice(1);
+      // ✅ Siempre registrar al jugador
+      fetch("/guardar_jugador", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre: nombreCompleto, mesa })
+      });
 
+      document.getElementById("registro").style.display = "none";
+      document.getElementById("buzzer").style.display = "block";
+      document.getElementById("nombre_hidden").value = usuario;
+      document.getElementById("usuarioActivo").textContent = `Jugador: ${usuario}`;
+    }
+  }
     async function actualizar() {
       const res = await fetch("/estado");
       const datos = await res.json();
