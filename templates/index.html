@@ -171,13 +171,21 @@
       });
     });
 
-    function guardarDatos() {
-      const nombre = document.getElementById("nombre").value.trim();
-      const mesa = document.getElementById("mesa").value;
-      const usuario = `${nombre} (${mesa})`;
-      localStorage.setItem("usuario", usuario);
-      mostrarBuzzer();
-    }
+  function guardarDatos() {
+    const nombre = document.getElementById("nombre").value.trim();
+    const mesa = document.getElementById("mesa").value;
+    const usuario = `${nombre} (${mesa})`;
+    localStorage.setItem("usuario", usuario);
+
+    // 👇 ESTA ES LA LÍNEA CLAVE QUE AGREGA EL REGISTRO EN EL SERVIDOR
+    fetch("/guardar_jugador", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre, mesa })
+    }).then(() => {
+      mostrarBuzzer();  // solo se muestra el buzzer después de registrar en servidor
+    });
+  }
 
     function mostrarBuzzer() {
       const usuario = localStorage.getItem("usuario");
